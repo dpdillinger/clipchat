@@ -1,11 +1,11 @@
-(ns clipchat.core
+(ns clipchat.rooms
   (:use [clojure.data.json :only (json-str write-json read-json)])
   (:require [clj-http.client :as client]))
 
 (def api-url "http://api.hipchat.com/v1")
 ;(def api-url "http://localhost/v1")
 
-(defn list-rooms [auth-token]
+(defn list [auth-token]
   " Returns a vector of maps defining the rooms available. https://www.hipchat.com/docs/api/method/rooms/list "
   (:rooms
    (read-json
@@ -14,7 +14,7 @@
                                               { "format" "json"
                                                 "auth_token" auth-token}})))))
 
-(defn room-history [auth-token room-id date]
+(defn history [auth-token room-id date]
   " Returns the history of messages to the specified room as a vector of maps.
     https://www.hipchat.com/docs/api/method/rooms/history "
   (:messages (read-json
@@ -26,7 +26,7 @@
                                                              "date" date }})))))
 
 
-(defn send-message-post [auth-token { room-id :room-id
+(defn message-post [auth-token { room-id :room-id
                                 from :from
                                 message :message
                                 notify :notify
@@ -45,7 +45,7 @@
     (println (str "Body: " body))
     (client/post (str api-url "/rooms/message") {:query-params {"format" "json" "auth_token" auth-token} :body body})))
 
-(defn send-message [auth-token { room-id :room-id
+(defn message [auth-token { room-id :room-id
                                 from :from
                                 message :message
                                 notify :notify
@@ -67,4 +67,33 @@
                                                                "message" message
                                                                "notify" notify
                                                                "color" color}})))
+
+(defn show [auth-token room-id]
+  (:room
+   (read-json
+    (:body
+     (client/get (str api-url "/rooms/show") {:query-params {"format" "json"
+                                                             "auth_token" auth-token
+                                                             "room_id" room-id}})))))
+
+(defn create [auth-token {name :name
+                          owner_user_id :owner_user_id
+                          privacy :privacy
+                          topic :topic
+                          guest_access :guest_access :as opts}]
+  (let [{:keys [room-id from message notify color] :or {guest_access 0 topic "" "privacy" "public"}} opts
+        url (str api-url "/rooms/create?" (client/generate-query-string {"format" "json"
+                                                                         "auth_token" auth-token}))]
+    (client/post url {:body (client/generate-query-string {"name" name
+                                                           "owner_user_id" owner_user_id
+                                                           "privacy" privacy
+                                                           "topic" topic
+                                                           "guest_access" guest_access})})))
+(defn delete [auth-token room-id]
+  (client/post (str api-url "/rooms/delete?" (client/generate-query-string {"format" "json"
+                                                                            "auth_token" auth-token}))
+               {:body (client/generate-query-string {"room_id" room-id})}))
+
+(defn testquery [m]
+  (client/generate-query-string m))
 

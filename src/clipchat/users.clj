@@ -8,16 +8,21 @@
                           title :title
                           is_group_admin :is_group_admin
                           password :password
-                          timezone :timezone}]
+                          timezone :timezone :as opts}]
   (let [{:keys [room-id from message notify color] :or {is_group_admin 0 timezone "UTC" password ""}} opts
         url (str api-url "/users/create")
-        body (client/generate-query-string )]
+        body (client/generate-query-string opts)]
     (client/post url {:content-type urlencoded
                       :accept "json"
                       :body body
                       })))
 
-(defn delete [auth-token])
+(defn delete [auth-token {user_id :user_id :as opts}]
+  (let [url (str api-url "/users/delete")
+        query (assoc opts :auth_token auth-token)]
+    (client/post url {:content-type urlencoded
+                      :accept "json"
+                      :body body})))
 
 (defn list [auth-token])
 

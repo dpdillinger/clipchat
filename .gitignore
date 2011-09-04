@@ -4,3 +4,8 @@ pom.xml
 /classes/
 .lein-failures
 .lein-deps-sum
+
+# editor debris
+*#
+.#*
+

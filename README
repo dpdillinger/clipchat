@@ -1,10 +1,10 @@
 # clipchat
 
-FIXME: write description
+Clojure wrappers around the HipChat API.
 
-## Usage
+https://www.hipchat.com/docs/api/
 
-FIXME: write
+
 
 ## License
 

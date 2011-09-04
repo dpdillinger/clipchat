@@ -16,7 +16,7 @@
 
 (defn delete [auth-token {user_id :user_id :as opts}]
   (let [url (str api-url "/users/delete")
-        query (assoc opts :auth_token auth-token)]
+        body (assoc opts :auth_token auth-token)]
     (client/post url (setup-call-body body))))
 
 (defn list [auth-token])

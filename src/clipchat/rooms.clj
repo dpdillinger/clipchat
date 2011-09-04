@@ -1,5 +1,5 @@
 (ns clipchat.rooms
-  (:use [clipchat.core :only [api-url urlencoded]])
+  (:use [clipchat.core])
   (:use [clojure.data.json :only (json-str write-json read-json)])
   (:require [clj-http.client :as client]))
 
@@ -36,9 +36,7 @@
     (:status
      (read-json
       (:body
-       (client/post (str api-url "/rooms/message") {:content-type urlencoded
-                                                    :accept "application/json"
-                                                    :body body}))))))
+       (client/post (str api-url "/rooms/message") (setup-call-body body)))))))
 
 (defn message-get [auth-token {room-id :room-id
                                from :from
@@ -49,21 +47,11 @@
   (map (fn [v] (if (nil? (get opts v)) (throw (java.lang.Exception. (str "Missing argument: " v))))) [:room-id :from :message])
   (let [{:keys [room-id from message notify color] :or {notify 0 color "yellow"}} opts
         url (str api-url "/rooms/message")
-        body (client/generate-query-string {"room_id" room-id
-                                            "from" from
-                                            "message" message
-                                            "notify" notify
-                                            "color" color})]
+        body (client/generate-query-string  (assoc opts :format "json" :auth_token auth-token))]
     (:status
      (read-json
       (:body
-       (client/get (str api-url "/rooms/message") {:query-params {"format" "json"
-                                                                  "auth_token" auth-token
-                                                                  "room_id" room-id
-                                                                  "from" from
-                                                                  "message" message
-                                                                  "notify" notify
-                                                                  "color" color}}))))))
+       (client/get url {:query-params body}))))))
 
 (defn show [auth-token {room_id :room_id :as opts}]
   (let [query (assoc opts :auth_token auth-token :format "json")]
@@ -83,9 +71,7 @@
     (:room
      (read-json
       (:body
-       (client/post url {:content-type urlencoded
-                         :accept "json"
-                         :body (client/generate-query-string query)}))))))
+       (client/post url (setup-call-body (client/generate-query-string query))))))))
 
 (defn delete [auth-token {room_id :room_id :as opts}]
   (let [{:keys [room_id]} opts
@@ -93,18 +79,6 @@
     (:deleted
      (read-json
       (:body
-       (client/post (str api-url "/rooms/delete")
-                    {:content-type urlencoded
-                     :accept "json"
-                     :body (client/generate-query-string query)}))))))
+       (client/post (str api-url "/rooms/delete") (setup-call-body query)))))))
 
 
-
-(defn testqs [{auth_token :auth_token
-               name :name
-               owner_user_id :owner_user_id
-               privacy :privacy
-               topic :topic
-               guest_access :guest_access :as opts }]
-  (let [{:keys [auth_token name owner_user_id privacy topic] :or { guest_access 0 topic "" "privacy" "public" }} opts]
-    (println (client/generate-query-string opts))))

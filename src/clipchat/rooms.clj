@@ -27,8 +27,7 @@
                            message :message
                            notify :notify
                            color :color :as opts }]
-  " XXX: not working yet
-    room-id from message notify color"
+  " room-id from message notify color"
   (map (fn [v] (if (nil? (get opts v)) (throw (java.lang.Exception. (str "Missing argument: " v))))) [:room-id :from :message])
   (let [{:keys [room-id from message notify color] :or {notify 0 color "yellow"}} opts
         url (str api-url "/rooms/message?" (client/generate-query-string {"format" "json" "auth_token" auth-token}) )
@@ -37,21 +36,6 @@
      (read-json
       (:body
        (client/post (str api-url "/rooms/message") (setup-call-body body)))))))
-
-(defn message-get [auth-token {room-id :room-id
-                               from :from
-                               message :message
-                               notify :notify
-                               color :color :as opts }]
-  " room-id from message notify color"
-  (map (fn [v] (if (nil? (get opts v)) (throw (java.lang.Exception. (str "Missing argument: " v))))) [:room-id :from :message])
-  (let [{:keys [room-id from message notify color] :or {notify 0 color "yellow"}} opts
-        url (str api-url "/rooms/message")
-        body (client/generate-query-string  (assoc opts :format "json" :auth_token auth-token))]
-    (:status
-     (read-json
-      (:body
-       (client/get url {:query-params body}))))))
 
 (defn show [auth-token {room_id :room_id :as opts}]
   (let [query (assoc opts :auth_token auth-token :format "json")]
@@ -64,10 +48,10 @@
                           owner_user_id :owner_user_id
                           privacy :privacy
                           topic :topic
-                          guest_access :guest_access :as opts }]
-  (let [{:keys [name owner_user_id privacy topic] :or { guest_access 0 topic "" "privacy" "public" }} opts
+                          guest_access :guest_access :as opts}]
+  (let [{:keys [name owner_user_id privacy topic guest_access]} opts
         url (str api-url "/rooms/create")
-        query (assoc opts :auth_token auth-token :format "json")]
+        query (conj {:auth_token auth-token :format "json" :guest_access 0 :topic "" :privacy "public"} opts)]
     (:room
      (read-json
       (:body
@@ -75,10 +59,11 @@
 
 (defn delete [auth-token {room_id :room_id :as opts}]
   (let [{:keys [room_id]} opts
+        url (str api-url "/rooms/delete")
         query  (assoc opts :auth_token auth-token :format "json")]
     (:deleted
      (read-json
       (:body
-       (client/post (str api-url "/rooms/delete") (setup-call-body query)))))))
+       (client/post url (setup-call-body (client/generate-query-string query))))))))
 
 

@@ -22,14 +22,14 @@
        (client/get (str api-url "/rooms/history") {:query-params query}))))))
 
 
-(defn message [auth-token {room-id :room-id
+(defn message [auth-token {room_id :room_id
                            from :from
                            message :message
                            notify :notify
                            color :color :as opts }]
-  " room-id from message notify color"
-  (map (fn [v] (if (nil? (get opts v)) (throw (java.lang.Exception. (str "Missing argument: " v))))) [:room-id :from :message])
-  (let [{:keys [room-id from message notify color] :or {notify 0 color "yellow"}} opts
+  " room_id from message notify color"
+  (map (fn [v] (if (nil? (get opts v)) (throw (java.lang.Exception. (str "Missing argument: " v))))) [:room_id :from :message])
+  (let [{:keys [room_id from message notify color] :or {notify 0 color "yellow"}} opts
         url (str api-url "/rooms/message?" (client/generate-query-string {"format" "json" "auth_token" auth-token}) )
         body (client/generate-query-string (assoc opts :auth_token auth-token :format "json"))]
     (:status
@@ -65,5 +65,3 @@
      (read-json
       (:body
        (client/post url (setup-call-body (client/generate-query-string query))))))))
-
-

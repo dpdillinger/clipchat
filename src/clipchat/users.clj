@@ -1,7 +1,6 @@
 (ns clipchat.rooms
-  (:use [clipchat.core])
-  (:use [clojure.data.json :only (json-str write-json read-json)])
-  (:require [clj-http.client :as client]))
+  (:require [clj-http.client :as client]
+            [clipchat.core :refer :all]))
 
 (defn create [auth-token {email :email
                           name :name
@@ -9,9 +8,11 @@
                           is_group_admin :is_group_admin
                           password :password
                           timezone :timezone :as opts}]
-  (let [{:keys [email name title is_group_admin password timezone] :or {is_group_admin 0 timezone "UTC" password ""}} opts
+  (let [{:keys [email name title is_group_admin password timezone]
+         :or {is_group_admin 0 timezone "UTC" password ""}} opts
         url (str api-url "/users/create")
-        body (client/generate-query-string (conj opts {:format "json" :auth_token auth-token}))]
+        body (client/generate-query-string
+              (conj opts {:format "json" :auth_token auth-token}))]
     (client/post url (setup-call-body body))))
 
 (defn update [auth-token {user_id :user_id
@@ -21,9 +22,11 @@
                            is_group_admin :is_group_admin
                            password :password
                            timezone :timezone :as opts}]
-  (let [{:keys [user_id email name title is_group_admin password timezone] :or {is_group_admin 0 timezone "UTC"}} opts
+  (let [{:keys [user_id email name title is_group_admin password timezone]
+         :or {is_group_admin 0 timezone "UTC"}} opts
         url (str api-url "/users/update")
-        body (client/generate-query-string (conj opts {:format "json" :auth_token auth-token}))]
+        body (client/generate-query-string
+              (conj opts {:format "json" :auth_token auth-token}))]
     (client/post url (setup-call-body body))))
 
 (defn delete [auth-token {user_id :user_id :as opts}]

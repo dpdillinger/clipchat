@@ -11,7 +11,8 @@
     (:rooms
      (json/read-str
       (:body
-       (client/get (str api-url "/rooms/list") {:query-params query}))))))
+       (client/get (str api-url "/rooms/list") {:query-params query}))
+      :key-fn keyword))))
 
 (defn history [auth-token {room_id :room_id date :date :as opts}]
   " Returns the history of messages to the specified room as a vector of maps.
@@ -20,7 +21,8 @@
     (:messages
      (json/read-str
       (:body
-       (client/get (str api-url "/rooms/history") {:query-params query}))))))
+       (client/get (str api-url "/rooms/history") {:query-params query}))
+      :key-fn keyword))))
 
 
 (defn message [auth-token {room_id :room_id
@@ -44,14 +46,16 @@
     (:status
      (json/read-str
       (:body
-       (client/post (str api-url "/rooms/message") (setup-call-body body)))))))
+       (client/post (str api-url "/rooms/message") (setup-call-body body)))
+      :key-fn keyword))))
 
 (defn show [auth-token {room_id :room_id :as opts}]
   (let [query (assoc opts :auth_token auth-token :format "json")]
     (:room
      (json/read-str
       (:body
-       (client/get (str api-url "/rooms/show") {:query-params query}))))))
+       (client/get (str api-url "/rooms/show") {:query-params query}))
+      :key-fn keyword))))
 
 (defn create [auth-token {name :name
                           owner_user_id :owner_user_id
@@ -71,7 +75,8 @@
       (:body
        (client/post url
                     (setup-call-body
-                     (client/generate-query-string query))))))))
+                     (client/generate-query-string query))))
+      :key-fn keyword))))
 
 (defn delete [auth-token {room_id :room_id :as opts}]
   (let [{:keys [room_id]} opts
@@ -82,4 +87,5 @@
       (:body
        (client/post url
                     (setup-call-body
-                     (client/generate-query-string query))))))))
+                     (client/generate-query-string query))))
+      :key-fn keyword))))
